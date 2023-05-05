@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model LicensePlate {
+  id         Int         @id @default(autoincrement())
+  plate      String      @db.VarChar(255)
+  hksRecords HksRecord[]
+}
+
+model Product {
+  id          Int           @id @default(autoincrement())
+  name        String        @db.VarChar(255)
+  productType ProductType[]
+  cksOwner    CksOwner[]
+  customer    Customer[]
+  hksRecords  HksRecord[]
+}
+
+model ProductType {
+  id         Int         @id @default(autoincrement())
+  name       String      @db.VarChar(255)
+  product    Product     @relation(fields: [productID], references: [id], onDelete: Restrict)
+  productID  Int
+  cksOwner   CksOwner[]
+  customer   Customer[]
+  hksRecords HksRecord[]
+}
+
+model Customer {
+  id            Int         @id @default(autoincrement())
+  name          String      @db.VarChar(255)
+  city          String      @db.VarChar(255)
+  county        String      @db.VarChar(255)
+  product       Product     @relation(fields: [productID], references: [id], onDelete: Restrict)
+  productID     Int
+  productType   ProductType @relation(fields: [productTypeID], references: [id], onDelete: Restrict)
+  productTypeID Int
+  billType      String
+  hksRecords    HksRecord[]
+}
+
+model CksOwner {
+  id            Int         @id @default(autoincrement())
+  name          String      @db.VarChar(255)
+  city          String      @db.VarChar(255)
+  county        String      @db.VarChar(255)
+  tckNo         String      @db.VarChar(255)
+  cksKg         Int
+  product       Product     @relation(fields: [productID], references: [id], onDelete: Restrict)
+  productID     Int
+  productType   ProductType @relation(fields: [productTypeID], references: [id], onDelete: Restrict)
+  productTypeID Int
+  hksRecords    HksRecord[]
+}
+
+model HksRecord {
+  id             Int          @id @default(autoincrement())
+  registerDate   DateTime
+  customer       Customer     @relation(fields: [customerID], references: [id], onDelete: Restrict)
+  customerID     Int
+  cksOwner       CksOwner     @relation(fields: [cksOwnerID], references: [id], onDelete: Restrict)
+  cksOwnerID     Int
+  product        Product      @relation(fields: [productID], references: [id], onDelete: Restrict)
+  productID      Int
+  productType    ProductType  @relation(fields: [productTypeID], references: [id], onDelete: Restrict)
+  productTypeID  Int
+  city           String       @db.VarChar(255)
+  county         String       @db.VarChar(255)
+  hksKg          Int
+  hksPrice       Float
+  licensePlate   LicensePlate @relation(fields: [licensePlateID], references: [id], onDelete: Restrict)
+  licensePlateID Int
+}
